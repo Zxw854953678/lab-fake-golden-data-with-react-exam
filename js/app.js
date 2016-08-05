@@ -20,14 +20,12 @@ const App = React.createClass({
   render: function () {
     return (
       <div>
-        <button className="btn btn-primary center-block"
-                onClick={this.toggle}>{this.state.isEditor ? "preview" : "edit"}</button>
-        <div className={this.state.isEditor ? "" : "hidden"}>
-          <Edit onAdd={this.addElem} elements={this.state.elements} onDel={this.delElem}/>
-        </div>
-        <div className={this.state.isEditor ? "hidden" : ""}>
-          <Preview elements={this.state.elements}/>
-        </div>
+        {this.props.children && React.cloneElement(this.props.children, {
+          onAdd: this.addElem,
+          onDel: this.delElem,
+          elements: this.state.elements
+        })}
+
       </div>
     );
   }
@@ -37,6 +35,9 @@ const Edit = React.createClass({
   render: function () {
     return (
       <div className="row">
+        <ReactRouter.Link to="/Preview">
+          <button className="btn btn-primary center-block">preview</button>
+        </ReactRouter.Link>
         <div className="col-md-2"></div>
         <div className="col-md-6">
           <Left elements={this.props.elements} remove={this.props.onDel}/>
@@ -79,10 +80,10 @@ const Right = React.createClass({
   render: function () {
     return (
       <div className="rightPan">
-        <p><input type="radio" name="elem" value="text" />Text</p>
+        <p><input type="radio" name="elem" value="text"/>Text</p>
         <p><input type="radio" name="elem" value="date"/>Date</p>
         <p>
-          <button className="btn btn-primary" onClick={this.add}> + </button>
+          <button className="btn btn-primary" onClick={this.add}> +</button>
         </p>
       </div>
     );
@@ -99,6 +100,9 @@ const Preview = React.createClass({
     });
     return (
       <div>
+        <ReactRouter.Link to="/">
+          <button className="btn btn-primary center-block">edit</button>
+        </ReactRouter.Link>
         <div className="Submit">
           {elements}
         </div>
@@ -113,4 +117,12 @@ const Preview = React.createClass({
   }
 });
 
-ReactDOM.render(<App/>, document.getElementById('content'));
+ReactDOM.render(
+  <ReactRouter.Router>
+    <ReactRouter.Route path="/" component={App}>
+      <ReactRouter.IndexRoute component={Edit} />
+      <ReactRouter.Route path="preview" component={Preview} />
+    </ReactRouter.Route>
+  </ReactRouter.Router>,
+  document.getElementById('content')
+);
